@@ -22,6 +22,9 @@ try
         case 3:
             SeveralTasksExample.Run(scheduler);
             break;
+        case 4:
+            ConfigureAwaitExample.Run(scheduler);
+            break;
     }
 }
 catch (Exception ex)
@@ -58,6 +61,7 @@ static int ReadExampleNum()
         Console.WriteLine("\t 1) Run task with ContinueWith");
         Console.WriteLine("\t 2) Run manually created task");
         Console.WriteLine("\t 3) Run several tasks");
+        Console.WriteLine("\t 4) Run task with configure await false");
         var input = Console.ReadLine();
         switch (input)
         {
@@ -69,6 +73,9 @@ static int ReadExampleNum()
                 break;
             case "3":
                 result = 3;
+                break;
+            case "4":
+                result = 4;
                 break;
         }
     }

@@ -6,12 +6,7 @@ public static class ManuallyCreatedTask
 {
     public static void Run(TaskScheduler scheduler)
     {
-        var task = Task.Factory.StartNew(
-            CustomTaskBuilder.BuildTask,
-            CancellationToken.None,
-            TaskCreationOptions.None,
-            scheduler);
-
+        var task = TaskRunner.RunTask(CustomTaskBuilder.BuildTask, scheduler);
         task.Wait();
     }
 }

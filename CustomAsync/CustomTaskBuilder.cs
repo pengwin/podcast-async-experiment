@@ -1,6 +1,3 @@
-
-
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace Async.CustomAsync;
@@ -24,19 +21,39 @@ public sealed class StateMachine : IAsyncStateMachine
         _builder = builder;
     }
 
-    public void MoveNext()
+    public void MoveNext() 
     {
-        if (_state == StateMachineState.Completed)
+        switch (_state)
         {
-            return;
+            case StateMachineState.Initial:
+                Initial();
+                _state = StateMachineState.Continuation1;
+                YieldTask();
+                return;
+            case StateMachineState.Continuation1:
+                Continuation1();
+                _state = StateMachineState.Continuation2;
+                YieldTask();
+                return;
+            case StateMachineState.Continuation2:
+                Continuation2();
+                _state = StateMachineState.Completed;
+                YieldTask();
+                return;
+            case StateMachineState.Completed:
+                _builder.SetResult();
+                return;
+            default:
+                throw new InvalidOperationException($"Unknown state {_state}");
+        
         }
-        _state = SwitchState();
-        if (_state == StateMachineState.Completed)
+
+        void YieldTask()
         {
-            _builder.SetResult();
-            return;
+            YieldAwaitable.YieldAwaiter awaiter = Task.Yield().GetAwaiter();
+            var stateMachine = this;
+            _builder.AwaitUnsafeOnCompleted(ref awaiter, ref stateMachine);
         }
-        YieldTask();
     }
 
     public void SetStateMachine(IAsyncStateMachine stateMachine)
@@ -44,41 +61,19 @@ public sealed class StateMachine : IAsyncStateMachine
         _builder.SetStateMachine(stateMachine);
     }
 
-    private void YieldTask() 
-    {
-        YieldAwaitable.YieldAwaiter awaiter = Task.Yield().GetAwaiter();
-        if (!awaiter.IsCompleted)
-        {
-            var stateMachine = this;
-            _builder.AwaitUnsafeOnCompleted(ref awaiter, ref stateMachine);
-        }
-    }
-
-    private StateMachineState SwitchState() => _state switch
-    {
-        StateMachineState.Initial => Initial(),
-        StateMachineState.Continuation1 => Continuation1(),
-        StateMachineState.Continuation2 => Continuation2(),
-        StateMachineState.Completed => StateMachineState.Completed,
-        _ => throw new InvalidOperationException($"Unknown state {_state}")
-    };
-
-    private StateMachineState Initial()
+    private void Initial()
     {
         Console.WriteLine("Initial  on ThreadId {0}", Thread.CurrentThread.ManagedThreadId);
-        return StateMachineState.Continuation1;
     }
 
-    private StateMachineState Continuation1()
+    private void Continuation1()
     {
         Console.WriteLine("Continuation1  on ThreadId {0}", Thread.CurrentThread.ManagedThreadId);
-        return StateMachineState.Continuation2;
     }
 
-    private StateMachineState Continuation2()
+    private void Continuation2()
     {
         Console.WriteLine("Continuation2  on ThreadId {0}", Thread.CurrentThread.ManagedThreadId);
-        return StateMachineState.Completed;
     }
 }
 

@@ -25,6 +25,9 @@ try
         case 4:
             ConfigureAwaitExample.Run(scheduler);
             break;
+        case 5:
+            DeadlockExample.Run(scheduler, true);
+            break;
     }
 }
 catch (Exception ex)
@@ -62,6 +65,7 @@ static int ReadExampleNum()
         Console.WriteLine("\t 2) Run manually created task");
         Console.WriteLine("\t 3) Run several tasks");
         Console.WriteLine("\t 4) Run task with configure await false");
+        Console.WriteLine("\t 5) Run task with deadlock configure await false");
         var input = Console.ReadLine();
         switch (input)
         {
@@ -76,6 +80,9 @@ static int ReadExampleNum()
                 break;
             case "4":
                 result = 4;
+                break;
+            case "5":
+                result = 5;
                 break;
         }
     }
